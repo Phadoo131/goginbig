@@ -1,29 +1,24 @@
 [{
-    "id": "1",
     "title": "Hamlet",
     "author": "William Shakespeare",
     "quantity": 2
 },
 {
-    "id": "2",
     "title": "Goose duck duck",
     "author": "William Shakespeare",
     "quantity": 7
 },
 {
-    "id": "3",
     "title": "Duck Duck Goose",
     "author": "William Shakespeare",
     "quantity": 1
 },
 {
-    "id": "4",
     "title": "Oh my Oh my Gosh!",
     "author": "Shilliam Cakesphere",
     "quantity": 1
 },
 {
-    "id": "5",
     "title": "Who shot my brother?",
     "author": "Flamekaiser",
     "quantity": 19
