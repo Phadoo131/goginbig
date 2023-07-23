@@ -2,18 +2,23 @@ package main
 
 import (
 	"database/sql"
-	"github.com/gin-gonic/gin"
-	_ "github.com/proullon/ramsql/driver"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
+	_ "github.com/proullon/ramsql/driver"
 )
 
 type book struct {
 	ID       string `json:"id"`
 	Title    string `json:"title"`
 	Author   string `json:"author"`
-	Quantity int    `json:"quantity"`
+	Quantity int64    `json:"quantity"`
 }
 
 func GetBook(c *gin.Context) {
@@ -79,44 +84,11 @@ func GetBook(c *gin.Context) {
 
 func CreateBook(c *gin.Context) {
 	var newBook book
-	// var newBooks []book
-	// //Check body
-	// c.Header("Content-Type", "application/json; charset=utf-8")
-	// body, _ := ioutil.ReadAll(c.Request.Body)
-	// fmt.Println(string(body))
-
-	// c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 
 	if err := c.BindJSON(&newBook); err != nil {
-		// c.JSON(http.StatusBadRequest, err.Error())
-		// if err := c.BindJSON(&newBooks); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-
-	// 	db := c.MustGet("db").(*sql.DB)
-
-	// 	stmt, err := db.Prepare(`
-	// 		INSERT INTO booksshelf(id, title, author, quantity)
-	// 		VALUES (?, ?, ?, ?);
-	// 	`)
-	// 	if err != nil {
-	// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	// 		return
-	// 	}
-	// 	defer stmt.Close()
-
-	// 	for _, b := range newBooks {
-	// 		_, err := stmt.Exec(b.ID, b.Title, b.Author, b.Quantity)
-	// 		if err != nil {
-	// 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	// 			return
-	// 		}
-	// 	}
-
-	// 	c.JSON(http.StatusCreated, newBooks)
-	// 	return
-	// }
 
 	db := c.MustGet("db").(*sql.DB)
 
@@ -233,6 +205,41 @@ func conn() {
 	}
 }
 
+func LoginHandler (c *gin.Context){
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.StandardClaims{
+		ExpiresAt: time.Now().Add(5 *time.Minute).Unix(),
+	})
+
+	ss, err := token.SignedString([]byte("Biggiebook"))
+	if err != nil{
+		c.JSON(http.StatusInternalServerError, gin.H{"message ": err.Error(),})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": ss,})
+}
+
+func ValidateToken (token string) error {
+	_, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error){
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok{
+			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+		}
+		return []byte("Biggiebook"), nil
+	})
+	return err
+}
+
+func AuthorizationMiddleware (c *gin.Context){
+	r := c.Request.Header.Get("Authorization")
+
+	token := strings.TrimPrefix(r, "Bearer ")
+
+	if err := ValidateToken(token); err != nil{
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+}
+
+
 func main() {
 	conn()
 
@@ -256,10 +263,14 @@ func main() {
 		c.Set("db", db)
 		c.Next()
 	})
-	router.GET("/books", GetBook)
-	router.POST("/books", CreateBook)
-	router.GET("/books/:id", GetBookByID)
-	router.PATCH("/checkout", CheckoutBook)
-	router.PATCH("/return", ReturnBook)
+	router.POST("/login", LoginHandler)
+
+	secured := router.Group("/", AuthorizationMiddleware)
+
+	secured.GET("/books", GetBook)
+	secured.POST("/books", CreateBook)
+	secured.GET("/books/:id", GetBookByID)
+	secured.PATCH("/checkout", CheckoutBook)
+	secured.PATCH("/return", ReturnBook)
 	router.Run("localhost:2566")
 }
