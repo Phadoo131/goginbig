@@ -1,0 +1,14 @@
+ispost:
+	docker run --name bookpostgres -p 5555:5555 -e POSTGRES_USER=bigtest -e POSTGRES_PASSWORD=phadoosecret -d postgres:15.3-alpine
+
+createdb:
+	docker exec -it bookpostgres createdb --username=bigtest --owner=bigtest booksshelf
+	
+execdb:
+	docker exec -it bookpostgres psql -U bigtest -d booksshelf
+
+dropdb:
+	docker exec -it bookpostgres dropdb booksshelf	
+
+
+.PHONY: ispost createdb dropdb

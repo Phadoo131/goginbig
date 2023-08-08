@@ -1,0 +1,49 @@
+POST http://localhost:2566/login
+###
+
+GET http://localhost:2566/books
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTAwOTAwNDJ9.uJ1FYAb04baXO_XBXR1cFtumrZ4RcsFkzt7rzgumt1s
+###
+
+POST http://localhost:2566/books
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTAwOTAwNDJ9.uJ1FYAb04baXO_XBXR1cFtumrZ4RcsFkzt7rzgumt1s
+Content-Type: "application/json"
+
+{
+    "title": "Gosaducsd s sadsadv sasassdsadasd  sk",
+    "author": "sdasdsasadasddsdpeare",
+    "quantity": 7
+}
+###
+POST http://localhost:2566/books
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTAwOTAwNDJ9.uJ1FYAb04baXO_XBXR1cFtumrZ4RcsFkzt7rzgumt1s
+Content-Type: "application/json"
+
+{
+    "title": "Gsdsadsk",
+    "author": "sdasdsasadasddsdpeare",
+    "quantity": 10
+}
+###
+POST http://localhost:2566/books
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTAwOTAwNDJ9.uJ1FYAb04baXO_XBXR1cFtumrZ4RcsFkzt7rzgumt1s
+Content-Type: "application/json"
+
+{
+    "title": "Gsdsadsk dsgAfs",
+    "author": "sdasdsasadasddsdpeare",
+    "quantity": 12
+}
+###
+
+GET http://localhost:2566/books/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTAwOTAwNDJ9.uJ1FYAb04baXO_XBXR1cFtumrZ4RcsFkzt7rzgumt1s
+###
+
+PATCH http://localhost:2566/checkout?id=2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTAwOTAwNDJ9.uJ1FYAb04baXO_XBXR1cFtumrZ4RcsFkzt7rzgumt1s
+###
+
+PATCH http://localhost:2566/return?id=2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTAwOTAwNDJ9.uJ1FYAb04baXO_XBXR1cFtumrZ4RcsFkzt7rzgumt1s
+###
