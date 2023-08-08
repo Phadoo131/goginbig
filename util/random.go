@@ -26,6 +26,10 @@ func RandomString (n int) string {
 	return sb.String()
 }
 
+func RandomOwner() string{
+	return RandomString(6)
+}
+
 func RandomTitle() string{
 	return RandomString(12)
 }

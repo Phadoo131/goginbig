@@ -1,14 +1,22 @@
-ispost:
-	docker run --name bookpostgres -p 5555:5555 -e POSTGRES_USER=bigtest -e POSTGRES_PASSWORD=phadoosecret -d postgres:15.3-alpine
+ispost2:
+	docker run --name bookapipsql -p 5444:5432 -e POSTGRES_USER=bigsimpleapi -e POSTGRES_PASSWORD=phadoo131 -d postgres:15.3-alpine
 
-createdb:
-	docker exec -it bookpostgres createdb --username=bigtest --owner=bigtest booksshelf
-	
-execdb:
-	docker exec -it bookpostgres psql -U bigtest -d booksshelf
+createdb2:
+	docker exec -it bookapipsql createdb --username=bigsimpleapi --owner=bigsimpleapi bookstoredb
 
-dropdb:
-	docker exec -it bookpostgres dropdb booksshelf	
+execdb2:
+	docker exec -it bookapipsql psql -U bigsimpleapi -d bookstoredb
 
+dropdb2:
+	docker exec -it bookapipsql dropdb bookstoredb
 
-.PHONY: ispost createdb dropdb
+migrateup2:
+	migrate -path ./db/migration -database "postgresql://bigsimpleapi:phadoo131@localhost:5444/?sslmode=disable" -verbose up
+
+migratedown2:
+	migrate -path ./db/migration -database "postgresql://bigsimpleapi:phadoo131@localhost:5444/?sslmode=disable" -verbose down
+
+forcemigrateup:
+	migrate -database "postgresql://bigsimpleapi:phadoo131@localhost:5444/?sslmode=disable" -path ./db/migration force 000001
+
+.PHONY: ispost2 createdb2 execdb2 dropdb2 migrateup2 migratedown2 forcemigrateup
