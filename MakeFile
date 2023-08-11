@@ -11,7 +11,7 @@ dropdb2:
 	docker exec -it bookapipsql dropdb bookstoredb
 
 migrateup2:
-	migrate -path ./db/migration -database "postgresql://bigsimpleapi:phadoo131@localhost:5444/?sslmode=disable" -verbose up
+	migrate -path ./db/migration -database ≈ -verbose up
 
 migratedown2:
 	migrate -path ./db/migration -database "postgresql://bigsimpleapi:phadoo131@localhost:5444/?sslmode=disable" -verbose down
