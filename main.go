@@ -50,10 +50,3 @@ func main() {
 	secured.PATCH("/return", service.ReturnBook)
 	router.Run("localhost:2566")
 }
-
-
-func AdaptHTTPHandlerToGin(handler http.Handler) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		handler.ServeHTTP(c.Writer, c.Request)
-	}
-}
