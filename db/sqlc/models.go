@@ -11,29 +11,19 @@ import (
 type Account struct {
 	ID        int64     `json:"id"`
 	Owner     string    `json:"owner"`
-	Book      string    `json:"book"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 
 type Entry struct {
 	ID        int64     `json:"id"`
 	AccountID int64     `json:"accountId"`
+	Book      string    `json:"book"`
 	Amount    int64     `json:"amount"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 
 type Instore struct {
 	Book      string    `json:"book"`
-	Owner     string    `json:"owner"`
 	Bookcount int64     `json:"bookcount"`
 	CreatedAt time.Time `json:"createdAt"`
 }
-
-type Returnandborrow struct {
-	ID            int64     `json:"id"`
-	FromAccountID int64     `json:"fromAccountId"`
-	Book          string    `json:"book"`
-	Bookcount     int64     `json:"bookcount"`
-	CreatedAt     time.Time `json:"createdAt"`
-}
-

@@ -33,20 +33,17 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.createInstoreStmt, err = db.PrepareContext(ctx, createInstore); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateInstore: %w", err)
 	}
-	if q.createrReturnAndBorrowStmt, err = db.PrepareContext(ctx, createrReturnAndBorrow); err != nil {
-		return nil, fmt.Errorf("error preparing query CreaterReturnAndBorrow: %w", err)
-	}
 	if q.deleteAccountStmt, err = db.PrepareContext(ctx, deleteAccount); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteAccount: %w", err)
 	}
 	if q.getAccountStmt, err = db.PrepareContext(ctx, getAccount); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAccount: %w", err)
 	}
-	if q.getAccountForUpdateStmt, err = db.PrepareContext(ctx, getAccountForUpdate); err != nil {
-		return nil, fmt.Errorf("error preparing query GetAccountForUpdate: %w", err)
-	}
 	if q.getEntryStmt, err = db.PrepareContext(ctx, getEntry); err != nil {
 		return nil, fmt.Errorf("error preparing query GetEntry: %w", err)
+	}
+	if q.getEntryForUpdateStmt, err = db.PrepareContext(ctx, getEntryForUpdate); err != nil {
+		return nil, fmt.Errorf("error preparing query GetEntryForUpdate: %w", err)
 	}
 	if q.getInstoreStmt, err = db.PrepareContext(ctx, getInstore); err != nil {
 		return nil, fmt.Errorf("error preparing query GetInstore: %w", err)
@@ -54,26 +51,20 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getInstoreForUpdateStmt, err = db.PrepareContext(ctx, getInstoreForUpdate); err != nil {
 		return nil, fmt.Errorf("error preparing query GetInstoreForUpdate: %w", err)
 	}
-	if q.getTransferStmt, err = db.PrepareContext(ctx, getTransfer); err != nil {
-		return nil, fmt.Errorf("error preparing query GetTransfer: %w", err)
-	}
-	if q.listAccountStmt, err = db.PrepareContext(ctx, listAccount); err != nil {
-		return nil, fmt.Errorf("error preparing query ListAccount: %w", err)
+	if q.listAccountsStmt, err = db.PrepareContext(ctx, listAccounts); err != nil {
+		return nil, fmt.Errorf("error preparing query ListAccounts: %w", err)
 	}
 	if q.listEntriesStmt, err = db.PrepareContext(ctx, listEntries); err != nil {
 		return nil, fmt.Errorf("error preparing query ListEntries: %w", err)
 	}
-	if q.listTransfersStmt, err = db.PrepareContext(ctx, listTransfers); err != nil {
-		return nil, fmt.Errorf("error preparing query ListTransfers: %w", err)
+	if q.listInstoreStmt, err = db.PrepareContext(ctx, listInstore); err != nil {
+		return nil, fmt.Errorf("error preparing query ListInstore: %w", err)
 	}
-	if q.listinStoreStmt, err = db.PrepareContext(ctx, listinStore); err != nil {
-		return nil, fmt.Errorf("error preparing query ListinStore: %w", err)
+	if q.updateEntriesStmt, err = db.PrepareContext(ctx, updateEntries); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateEntries: %w", err)
 	}
-	if q.updateAccountStmt, err = db.PrepareContext(ctx, updateAccount); err != nil {
-		return nil, fmt.Errorf("error preparing query UpdateAccount: %w", err)
-	}
-	if q.updateinStoreStmt, err = db.PrepareContext(ctx, updateinStore); err != nil {
-		return nil, fmt.Errorf("error preparing query UpdateinStore: %w", err)
+	if q.updateInstoreStmt, err = db.PrepareContext(ctx, updateInstore); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateInstore: %w", err)
 	}
 	return &q, nil
 }
@@ -95,11 +86,6 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing createInstoreStmt: %w", cerr)
 		}
 	}
-	if q.createrReturnAndBorrowStmt != nil {
-		if cerr := q.createrReturnAndBorrowStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing createrReturnAndBorrowStmt: %w", cerr)
-		}
-	}
 	if q.deleteAccountStmt != nil {
 		if cerr := q.deleteAccountStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteAccountStmt: %w", cerr)
@@ -110,14 +96,14 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getAccountStmt: %w", cerr)
 		}
 	}
-	if q.getAccountForUpdateStmt != nil {
-		if cerr := q.getAccountForUpdateStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getAccountForUpdateStmt: %w", cerr)
-		}
-	}
 	if q.getEntryStmt != nil {
 		if cerr := q.getEntryStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getEntryStmt: %w", cerr)
+		}
+	}
+	if q.getEntryForUpdateStmt != nil {
+		if cerr := q.getEntryForUpdateStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getEntryForUpdateStmt: %w", cerr)
 		}
 	}
 	if q.getInstoreStmt != nil {
@@ -130,14 +116,9 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getInstoreForUpdateStmt: %w", cerr)
 		}
 	}
-	if q.getTransferStmt != nil {
-		if cerr := q.getTransferStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getTransferStmt: %w", cerr)
-		}
-	}
-	if q.listAccountStmt != nil {
-		if cerr := q.listAccountStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing listAccountStmt: %w", cerr)
+	if q.listAccountsStmt != nil {
+		if cerr := q.listAccountsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing listAccountsStmt: %w", cerr)
 		}
 	}
 	if q.listEntriesStmt != nil {
@@ -145,24 +126,19 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing listEntriesStmt: %w", cerr)
 		}
 	}
-	if q.listTransfersStmt != nil {
-		if cerr := q.listTransfersStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing listTransfersStmt: %w", cerr)
+	if q.listInstoreStmt != nil {
+		if cerr := q.listInstoreStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing listInstoreStmt: %w", cerr)
 		}
 	}
-	if q.listinStoreStmt != nil {
-		if cerr := q.listinStoreStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing listinStoreStmt: %w", cerr)
+	if q.updateEntriesStmt != nil {
+		if cerr := q.updateEntriesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateEntriesStmt: %w", cerr)
 		}
 	}
-	if q.updateAccountStmt != nil {
-		if cerr := q.updateAccountStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing updateAccountStmt: %w", cerr)
-		}
-	}
-	if q.updateinStoreStmt != nil {
-		if cerr := q.updateinStoreStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing updateinStoreStmt: %w", cerr)
+	if q.updateInstoreStmt != nil {
+		if cerr := q.updateInstoreStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateInstoreStmt: %w", cerr)
 		}
 	}
 	return err
@@ -202,47 +178,41 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                         DBTX
-	tx                         *sql.Tx
-	createAccountStmt          *sql.Stmt
-	createEntryStmt            *sql.Stmt
-	createInstoreStmt          *sql.Stmt
-	createrReturnAndBorrowStmt *sql.Stmt
-	deleteAccountStmt          *sql.Stmt
-	getAccountStmt             *sql.Stmt
-	getAccountForUpdateStmt    *sql.Stmt
-	getEntryStmt               *sql.Stmt
-	getInstoreStmt             *sql.Stmt
-	getInstoreForUpdateStmt    *sql.Stmt
-	getTransferStmt            *sql.Stmt
-	listAccountStmt            *sql.Stmt
-	listEntriesStmt            *sql.Stmt
-	listTransfersStmt          *sql.Stmt
-	listinStoreStmt            *sql.Stmt
-	updateAccountStmt          *sql.Stmt
-	updateinStoreStmt          *sql.Stmt
+	db                      DBTX
+	tx                      *sql.Tx
+	createAccountStmt       *sql.Stmt
+	createEntryStmt         *sql.Stmt
+	createInstoreStmt       *sql.Stmt
+	deleteAccountStmt       *sql.Stmt
+	getAccountStmt          *sql.Stmt
+	getEntryStmt            *sql.Stmt
+	getEntryForUpdateStmt   *sql.Stmt
+	getInstoreStmt          *sql.Stmt
+	getInstoreForUpdateStmt *sql.Stmt
+	listAccountsStmt        *sql.Stmt
+	listEntriesStmt         *sql.Stmt
+	listInstoreStmt         *sql.Stmt
+	updateEntriesStmt       *sql.Stmt
+	updateInstoreStmt       *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                         tx,
-		tx:                         tx,
-		createAccountStmt:          q.createAccountStmt,
-		createEntryStmt:            q.createEntryStmt,
-		createInstoreStmt:          q.createInstoreStmt,
-		createrReturnAndBorrowStmt: q.createrReturnAndBorrowStmt,
-		deleteAccountStmt:          q.deleteAccountStmt,
-		getAccountStmt:             q.getAccountStmt,
-		getAccountForUpdateStmt:    q.getAccountForUpdateStmt,
-		getEntryStmt:               q.getEntryStmt,
-		getInstoreStmt:             q.getInstoreStmt,
-		getInstoreForUpdateStmt:    q.getInstoreForUpdateStmt,
-		getTransferStmt:            q.getTransferStmt,
-		listAccountStmt:            q.listAccountStmt,
-		listEntriesStmt:            q.listEntriesStmt,
-		listTransfersStmt:          q.listTransfersStmt,
-		listinStoreStmt:            q.listinStoreStmt,
-		updateAccountStmt:          q.updateAccountStmt,
-		updateinStoreStmt:          q.updateinStoreStmt,
+		db:                      tx,
+		tx:                      tx,
+		createAccountStmt:       q.createAccountStmt,
+		createEntryStmt:         q.createEntryStmt,
+		createInstoreStmt:       q.createInstoreStmt,
+		deleteAccountStmt:       q.deleteAccountStmt,
+		getAccountStmt:          q.getAccountStmt,
+		getEntryStmt:            q.getEntryStmt,
+		getEntryForUpdateStmt:   q.getEntryForUpdateStmt,
+		getInstoreStmt:          q.getInstoreStmt,
+		getInstoreForUpdateStmt: q.getInstoreForUpdateStmt,
+		listAccountsStmt:        q.listAccountsStmt,
+		listEntriesStmt:         q.listEntriesStmt,
+		listInstoreStmt:         q.listInstoreStmt,
+		updateEntriesStmt:       q.updateEntriesStmt,
+		updateInstoreStmt:       q.updateInstoreStmt,
 	}
 }

@@ -8,18 +8,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func CreateRandomAccount(t *testing.T) Account{
-	arg := CreateAccountParams{
+func CreateRandomAccount(t *testing.T) Account {
+	arg := Account{
 		Owner: util.RandomOwner(),
-		Book:  util.RandomTitle(),
 	}
 
-	account, err := testQuerie.CreateAccount(context.Background(), arg)
+	account, err := testQuerie.CreateAccount(context.Background(), arg.Owner)
 	require.NoError(t, err)
 	require.NotEmpty(t, account)
 
 	require.Equal(t, arg.Owner, account.Owner)
-	require.Equal(t, arg.Book, account.Book)
 
 	require.NotZero(t, account.ID)
 	require.NotZero(t, account.CreatedAt)
@@ -27,9 +25,9 @@ func CreateRandomAccount(t *testing.T) Account{
 	return account
 }
 
-func CreateRandomBookInStore(t *testing.T) Instore{
+func CreateRandomBookInStore(t *testing.T) Instore {
 	arg := CreateInstoreParams{
-		Book: util.RandomTitle(),
+		Book:      util.RandomTitle(),
 		Bookcount: util.RandomInt(1, 10),
 	}
 
@@ -48,4 +46,31 @@ func CreateRandomBookInStore(t *testing.T) Instore{
 func TestCreateAccount(t *testing.T) {
 	CreateRandomBookInStore(t)
 	CreateRandomAccount(t)
+}
+
+func TestDeleteAccount(t *testing.T) {
+	newacc := CreateRandomAccount(t)
+	require.NotEmpty(t, newacc)
+
+	err := testQuerie.DeleteAccount(context.Background(), newacc.ID)
+	require.NoError(t, err)
+}
+
+func TestGetAccount(t *testing.T){
+	newacc := CreateRandomAccount(t)
+	require.NotEmpty(t, newacc)
+
+	acc, err := testQuerie.GetAccount(context.Background(), newacc.ID)
+	require.NoError(t, err)
+	require.NotEmpty(t, acc)
+
+	require.Equal(t, acc.ID, newacc.ID)
+	require.Equal(t, acc.Owner, newacc.Owner)
+	require.Equal(t, acc.CreatedAt, newacc.CreatedAt)
+}
+
+func TestListAccounts(t *testing.T){
+	accounts, err := testQuerie.ListAccounts(context.Background())
+	require.NoError(t, err)
+	require.NotEmpty(t, accounts)
 }

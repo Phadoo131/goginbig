@@ -12,24 +12,27 @@ import (
 const createEntry = `-- name: CreateEntry :one
 INSERT INTO entries (
   account_id,
+  book,
   amount
 ) VALUES (
-  $1, $2
+  $1, $2, $3
 )
-RETURNING id, account_id, amount, created_at
+RETURNING id, account_id, book, amount, created_at
 `
 
 type CreateEntryParams struct {
-	AccountID int64 `json:"accountId"`
-	Amount    int64 `json:"amount"`
+	AccountID int64  `json:"accountId"`
+	Book      string `json:"book"`
+	Amount    int64  `json:"amount"`
 }
 
 func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry, error) {
-	row := q.queryRow(ctx, q.createEntryStmt, createEntry, arg.AccountID, arg.Amount)
+	row := q.queryRow(ctx, q.createEntryStmt, createEntry, arg.AccountID, arg.Book, arg.Amount)
 	var i Entry
 	err := row.Scan(
 		&i.ID,
 		&i.AccountID,
+		&i.Book,
 		&i.Amount,
 		&i.CreatedAt,
 	)
@@ -37,7 +40,7 @@ func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry
 }
 
 const getEntry = `-- name: GetEntry :one
-SELECT id, account_id, amount, created_at FROM entries
+SELECT id, account_id, book, amount, created_at FROM entries
 WHERE id = $1 LIMIT 1
 `
 
@@ -47,6 +50,26 @@ func (q *Queries) GetEntry(ctx context.Context, id int64) (Entry, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.AccountID,
+		&i.Book,
+		&i.Amount,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getEntryForUpdate = `-- name: GetEntryForUpdate :one
+SELECT id, account_id, book, amount, created_at FROM entries
+WHERE account_id = $1 LIMIT 1
+FOR NO KEY UPDATE
+`
+
+func (q *Queries) GetEntryForUpdate(ctx context.Context, accountID int64) (Entry, error) {
+	row := q.queryRow(ctx, q.getEntryForUpdateStmt, getEntryForUpdate, accountID)
+	var i Entry
+	err := row.Scan(
+		&i.ID,
+		&i.AccountID,
+		&i.Book,
 		&i.Amount,
 		&i.CreatedAt,
 	)
@@ -54,21 +77,21 @@ func (q *Queries) GetEntry(ctx context.Context, id int64) (Entry, error) {
 }
 
 const listEntries = `-- name: ListEntries :many
-SELECT id, account_id, amount, created_at FROM entries
+SELECT id, account_id, book, amount, created_at FROM entries
 WHERE account_id = $1
 ORDER BY id
-LIMIT $2
-OFFSET $3
+LIMIT $3
+OFFSET $2
 `
 
 type ListEntriesParams struct {
 	AccountID int64 `json:"accountId"`
-	Limit     int32 `json:"limit"`
 	Offset    int32 `json:"offset"`
+	Limit     int32 `json:"limit"`
 }
 
 func (q *Queries) ListEntries(ctx context.Context, arg ListEntriesParams) ([]Entry, error) {
-	rows, err := q.query(ctx, q.listEntriesStmt, listEntries, arg.AccountID, arg.Limit, arg.Offset)
+	rows, err := q.query(ctx, q.listEntriesStmt, listEntries, arg.AccountID, arg.Offset, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -79,6 +102,7 @@ func (q *Queries) ListEntries(ctx context.Context, arg ListEntriesParams) ([]Ent
 		if err := rows.Scan(
 			&i.ID,
 			&i.AccountID,
+			&i.Book,
 			&i.Amount,
 			&i.CreatedAt,
 		); err != nil {
@@ -93,4 +117,30 @@ func (q *Queries) ListEntries(ctx context.Context, arg ListEntriesParams) ([]Ent
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateEntries = `-- name: UpdateEntries :one
+UPDATE entries
+SET amount = $3
+WHERE book = $2 AND account_id = $1
+RETURNING id, account_id, book, amount, created_at
+`
+
+type UpdateEntriesParams struct {
+	AccountID int64  `json:"accountId"`
+	Book      string `json:"book"`
+	Amount    int64  `json:"amount"`
+}
+
+func (q *Queries) UpdateEntries(ctx context.Context, arg UpdateEntriesParams) (Entry, error) {
+	row := q.queryRow(ctx, q.updateEntriesStmt, updateEntries, arg.AccountID, arg.Book, arg.Amount)
+	var i Entry
+	err := row.Scan(
+		&i.ID,
+		&i.AccountID,
+		&i.Book,
+		&i.Amount,
+		&i.CreatedAt,
+	)
+	return i, err
 }

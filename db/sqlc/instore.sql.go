@@ -12,51 +12,38 @@ import (
 const createInstore = `-- name: CreateInstore :one
 INSERT INTO instore (
   book,
-  owner,
   bookcount
 ) VALUES (
-  $1, $2, $3
+  $1, $2
 )
-RETURNING book, owner, bookcount, created_at
+RETURNING book, bookcount, created_at
 `
 
 type CreateInstoreParams struct {
 	Book      string `json:"book"`
-	Owner     string `json:"owner"`
 	Bookcount int64  `json:"bookcount"`
 }
 
 func (q *Queries) CreateInstore(ctx context.Context, arg CreateInstoreParams) (Instore, error) {
-	row := q.queryRow(ctx, q.createInstoreStmt, createInstore, arg.Book, arg.Owner, arg.Bookcount)
+	row := q.queryRow(ctx, q.createInstoreStmt, createInstore, arg.Book, arg.Bookcount)
 	var i Instore
-	err := row.Scan(
-		&i.Book,
-		&i.Owner,
-		&i.Bookcount,
-		&i.CreatedAt,
-	)
+	err := row.Scan(&i.Book, &i.Bookcount, &i.CreatedAt)
 	return i, err
 }
 
 const getInstore = `-- name: GetInstore :one
-SELECT book, owner, bookcount, created_at FROM instore
-WHERE book = $1 LIMIT 1
+SELECT book, bookcount, created_at FROM instore
 `
 
-func (q *Queries) GetInstore(ctx context.Context, book string) (Instore, error) {
-	row := q.queryRow(ctx, q.getInstoreStmt, getInstore, book)
+func (q *Queries) GetInstore(ctx context.Context) (Instore, error) {
+	row := q.queryRow(ctx, q.getInstoreStmt, getInstore)
 	var i Instore
-	err := row.Scan(
-		&i.Book,
-		&i.Owner,
-		&i.Bookcount,
-		&i.CreatedAt,
-	)
+	err := row.Scan(&i.Book, &i.Bookcount, &i.CreatedAt)
 	return i, err
 }
 
 const getInstoreForUpdate = `-- name: GetInstoreForUpdate :one
-SELECT book, owner, bookcount, created_at FROM instore
+SELECT book, bookcount, created_at FROM instore
 WHERE book = $1 LIMIT 1
 FOR NO KEY UPDATE
 `
@@ -64,29 +51,24 @@ FOR NO KEY UPDATE
 func (q *Queries) GetInstoreForUpdate(ctx context.Context, book string) (Instore, error) {
 	row := q.queryRow(ctx, q.getInstoreForUpdateStmt, getInstoreForUpdate, book)
 	var i Instore
-	err := row.Scan(
-		&i.Book,
-		&i.Owner,
-		&i.Bookcount,
-		&i.CreatedAt,
-	)
+	err := row.Scan(&i.Book, &i.Bookcount, &i.CreatedAt)
 	return i, err
 }
 
-const listinStore = `-- name: ListinStore :many
-SELECT book, owner, bookcount, created_at FROM instore
+const listInstore = `-- name: ListInstore :many
+SELECT book, bookcount, created_at FROM instore
 ORDER BY book
 LIMIT $1
 OFFSET $2
 `
 
-type ListinStoreParams struct {
+type ListInstoreParams struct {
 	Limit  int32 `json:"limit"`
 	Offset int32 `json:"offset"`
 }
 
-func (q *Queries) ListinStore(ctx context.Context, arg ListinStoreParams) ([]Instore, error) {
-	rows, err := q.query(ctx, q.listinStoreStmt, listinStore, arg.Limit, arg.Offset)
+func (q *Queries) ListInstore(ctx context.Context, arg ListInstoreParams) ([]Instore, error) {
+	rows, err := q.query(ctx, q.listInstoreStmt, listInstore, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -94,12 +76,7 @@ func (q *Queries) ListinStore(ctx context.Context, arg ListinStoreParams) ([]Ins
 	var items []Instore
 	for rows.Next() {
 		var i Instore
-		if err := rows.Scan(
-			&i.Book,
-			&i.Owner,
-			&i.Bookcount,
-			&i.CreatedAt,
-		); err != nil {
+		if err := rows.Scan(&i.Book, &i.Bookcount, &i.CreatedAt); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -113,27 +90,21 @@ func (q *Queries) ListinStore(ctx context.Context, arg ListinStoreParams) ([]Ins
 	return items, nil
 }
 
-const updateinStore = `-- name: UpdateinStore :one
+const updateInstore = `-- name: UpdateInstore :one
 UPDATE instore
-SET bookcount = $3
-WHERE book = $1 AND owner = $2
-RETURNING book, owner, bookcount, created_at
+SET bookcount = $2
+WHERE book = $1
+RETURNING book, bookcount, created_at
 `
 
-type UpdateinStoreParams struct {
+type UpdateInstoreParams struct {
 	Book      string `json:"book"`
-	Owner     string `json:"owner"`
 	Bookcount int64  `json:"bookcount"`
 }
 
-func (q *Queries) UpdateinStore(ctx context.Context, arg UpdateinStoreParams) (Instore, error) {
-	row := q.queryRow(ctx, q.updateinStoreStmt, updateinStore, arg.Book, arg.Owner, arg.Bookcount)
+func (q *Queries) UpdateInstore(ctx context.Context, arg UpdateInstoreParams) (Instore, error) {
+	row := q.queryRow(ctx, q.updateInstoreStmt, updateInstore, arg.Book, arg.Bookcount)
 	var i Instore
-	err := row.Scan(
-		&i.Book,
-		&i.Owner,
-		&i.Bookcount,
-		&i.CreatedAt,
-	)
+	err := row.Scan(&i.Book, &i.Bookcount, &i.CreatedAt)
 	return i, err
 }

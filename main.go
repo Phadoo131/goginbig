@@ -40,7 +40,11 @@ func main() {
 
 	secured := router.Group("/", middleware.AuthorizationMiddleware)
 
-	secured.GET("/books", service.GetBook)
+	secured.POST("/createaccount", service.CreateUserAccount)
+	secured.POST("/deleteaccount", service.DeleteUserAccount)
+	secured.GET("/account/admin", service.GetUserAccount)
+	secured.GET("/accounts/admin", service.GetAllUserAccounts)
+	secured.GET("/books", service.GetBookInstore)
 	secured.POST("/addbook", service.AddBookInstore)
 	secured.PATCH("/checkout", service.CheckoutBook)
 	secured.PATCH("/return", service.ReturnBook)
