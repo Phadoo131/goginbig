@@ -33,7 +33,7 @@ func Init() {
 //Accounts_________________________________________________________
 
 func CreateUserAccount(c *gin.Context){
-	var newAccount db.Account
+	var newAccount *db.Account = new(db.Account)
 
 	if err := c.ShouldBindJSON(&newAccount); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -113,7 +113,7 @@ func GetBookInstore(c *gin.Context) {
 }
 
 func AddBookInstore(c *gin.Context) {
-	var newBook db.Instore
+	var newBook *db.Instore = new(db.Instore)
 
 	if err := c.BindJSON(&newBook); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -180,4 +180,109 @@ func ReturnBook(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, updatedInstore)
+}
+
+//Entry______________________________________________
+
+func CreateEntryHandler(c *gin.Context) {
+	var createEntryParams db.CreateEntryParams
+	if err := c.ShouldBindJSON(&createEntryParams); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	entry, err := queries.CreateEntry(c, createEntryParams)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, entry)
+}
+
+func GetEntryHandler(c *gin.Context) {
+	entryIDStr := c.Param("entryID")
+	entryID, err := strconv.ParseInt(entryIDStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid entry ID"})
+		return
+	}
+
+	entry, err := queries.GetEntry(c, entryID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, entry)
+}
+
+func ListEntriesHandler(c *gin.Context) {
+	accountIDStr := c.Query("accountId")
+	accountID, err := strconv.ParseInt(accountIDStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid account ID"})
+		return
+	}
+
+	offsetStr := c.DefaultQuery("offset", "0")
+	limitStr := c.DefaultQuery("limit", "10")
+	offset, _ := strconv.Atoi(offsetStr)
+	limit, _ := strconv.Atoi(limitStr)
+
+	entries, err := queries.ListEntries(c, db.ListEntriesParams{
+		AccountID: accountID,
+		Offset:    int32(offset),
+		Limit:     int32(limit),
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, entries)
+}
+
+//Instore_________________________________
+
+func CreateInstoreHandler(c *gin.Context) {
+	var input db.CreateInstoreParams
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	instore, err := queries.CreateInstore(c, input)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, instore)
+}
+
+func GetInstoreHandler(c *gin.Context) {
+	instore, err := queries.GetInstore(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, instore)
+}
+
+func UpdateInstoreHandler(c *gin.Context) {
+	var input db.UpdateInstoreParams
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	instore, err := queries.UpdateInstore(c, input)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, instore)
 }
